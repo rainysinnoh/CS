@@ -1,0 +1,122 @@
+# ##########################################################
+#  DL ASSIGNMENT 3: Classify Fashion Clothing using CNN
+#  Dataset: Fashion-MNIST (10 clothing classes)
+# ##########################################################
+
+# ==================== CELL 1: Imports ====================
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+from sklearn.metrics import classification_report, confusion_matrix
+import warnings
+warnings.filterwarnings('ignore')
+
+
+# ==================== CELL 2: Load data ====================
+(x_train, y_train), (x_test, y_test) = keras.datasets.fashion_mnist.load_data()
+
+class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
+               'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+
+print("x_train:", x_train.shape, " x_test:", x_test.shape)
+
+
+# ==================== CELL 3: Visualise sample images ====================
+plt.figure(figsize=(10, 10))
+for i in range(25):
+    plt.subplot(5, 5, i + 1)
+    plt.imshow(x_train[i], cmap='gray')
+    plt.title(class_names[y_train[i]], fontsize=9)
+    plt.axis('off')
+plt.tight_layout()
+plt.show()
+
+
+# ==================== CELL 4: Preprocess (normalise 0-1, add channel dimension) ====================
+x_train = x_train.astype('float32') / 255.0
+x_test = x_test.astype('float32') / 255.0
+
+x_train = x_train.reshape(-1, 28, 28, 1)
+x_test = x_test.reshape(-1, 28, 28, 1)
+
+print("x_train:", x_train.shape, " x_test:", x_test.shape)
+
+
+# ==================== CELL 5: Build the CNN ====================
+model = keras.Sequential([
+    layers.Input(shape=(28, 28, 1)),
+
+    layers.Conv2D(32, (3, 3), activation='relu', padding='same'),
+    layers.MaxPooling2D((2, 2)),
+
+    layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+    layers.MaxPooling2D((2, 2)),
+
+    layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
+    layers.MaxPooling2D((2, 2)),
+
+    layers.Flatten(),
+    layers.Dense(128, activation='relu'),
+    layers.Dropout(0.3),
+    layers.Dense(10, activation='softmax')
+])
+model.summary()
+
+
+# ==================== CELL 6: Compile ====================
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+
+
+# ==================== CELL 7: Train ====================
+history = model.fit(x_train, y_train,
+                    epochs=10,
+                    batch_size=128,
+                    validation_split=0.1)
+
+
+# ==================== CELL 8: Plot accuracy and loss ====================
+fig, ax = plt.subplots(1, 2, figsize=(12, 4))
+
+ax[0].plot(history.history['accuracy'], label='Train')
+ax[0].plot(history.history['val_accuracy'], label='Validation')
+ax[0].set_title('Accuracy'); ax[0].set_xlabel('Epoch'); ax[0].legend()
+
+ax[1].plot(history.history['loss'], label='Train')
+ax[1].plot(history.history['val_loss'], label='Validation')
+ax[1].set_title('Loss'); ax[1].set_xlabel('Epoch'); ax[1].legend()
+plt.show()
+
+
+# ==================== CELL 9: Evaluate on test set ====================
+test_loss, test_acc = model.evaluate(x_test, y_test, verbose=0)
+print("Test Loss    :", test_loss)
+print("Test Accuracy:", test_acc)
+
+
+# ==================== CELL 10: Predictions, report and confusion matrix ====================
+y_pred = np.argmax(model.predict(x_test), axis=1)
+
+print(classification_report(y_test, y_pred, target_names=class_names))
+
+plt.figure(figsize=(9, 7))
+sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, fmt='d', cmap='Blues',
+            xticklabels=class_names, yticklabels=class_names)
+plt.xlabel('Predicted'); plt.ylabel('Actual'); plt.title('Confusion Matrix')
+plt.show()
+
+
+# ==================== CELL 11: Show predictions on test images ====================
+plt.figure(figsize=(10, 6))
+for i in range(10):
+    plt.subplot(2, 5, i + 1)
+    plt.imshow(x_test[i].reshape(28, 28), cmap='gray')
+    color = 'green' if y_pred[i] == y_test[i] else 'red'
+    plt.title(f"P: {class_names[y_pred[i]]}\nA: {class_names[y_test[i]]}", color=color, fontsize=8)
+    plt.axis('off')
+plt.tight_layout()
+plt.show()
