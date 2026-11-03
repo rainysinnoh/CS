@@ -1,12 +1,4 @@
-# ##########################################################
-#  DL ASSIGNMENT 2: Implementing Feedforward Neural Network
-#  with Keras and TensorFlow  (Dataset: MNIST)
-#  Steps: a. Import libraries   b. Load & preprocess data
-#         c. Define architecture   d. Train with SGD
-#         e. Evaluate   f. Plot loss and accuracy
-# ##########################################################
-
-# ==================== CELL 1: a. Import required libraries ====================
+# ==================== CELL 1: Assignment 2: Feedforward NN (MNIST) - a. Import required libraries ====================
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -16,9 +8,9 @@ from tensorflow import keras
 # ==================== CELL 2: b. Load MNIST data ====================
 (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
 
-print("x_train:", x_train.shape)    # 60,000 images of 28 x 28
+print("x_train:", x_train.shape)
 print("y_train:", y_train.shape)
-print("x_test :", x_test.shape)     # 10,000 images
+print("x_test :", x_test.shape)
 print("y_test :", y_test.shape)
 
 
@@ -39,10 +31,10 @@ print(x_train.shape, x_test.shape)
 # ==================== CELL 5: c. Define the network architecture ====================
 model = keras.Sequential([
     keras.layers.Input(shape=(28, 28)),
-    keras.layers.Flatten(),                                   # 28*28 -> 784
+    keras.layers.Flatten(),
     keras.layers.Dense(50, activation='relu', name='L1'),
     keras.layers.Dense(50, activation='relu', name='L2'),
-    keras.layers.Dense(10, activation='softmax', name='L3')   # 10 digits
+    keras.layers.Dense(10, activation='softmax', name='L3')
 ])
 model.summary()
 

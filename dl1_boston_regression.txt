@@ -1,9 +1,4 @@
-# ##########################################################
-#  DL ASSIGNMENT 1: Linear Regression using Deep Neural Network
-#  Dataset: Boston House Price Prediction
-# ##########################################################
-
-# ==================== CELL 1: Imports ====================
+# ==================== CELL 1: Imports - Assignment: Linear Regression using DNN (Boston House Price) ====================
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -20,11 +15,9 @@ np.random.seed(42)
 tf.random.set_seed(42)
 
 
-# ==================== CELL 2: Load data (Keras built-in Boston Housing) ====================
-# NOTE: sklearn's load_boston() was removed in scikit-learn 1.2, so we use the Keras copy.
+# ==================== CELL 2: Load data (Keras copy of Boston Housing; sklearn load_boston is removed) ====================
 (x_tr, y_tr), (x_te, y_te) = keras.datasets.boston_housing.load_data()
 
-# Merge train+test, then make our own split below
 X = np.concatenate([x_tr, x_te])
 y = np.concatenate([y_tr, y_te])
 
@@ -70,7 +63,7 @@ model = keras.Sequential([
     layers.Dense(128, activation='relu'),
     layers.Dense(64, activation='relu'),
     layers.Dense(32, activation='relu'),
-    layers.Dense(1)                       # linear output -> regression
+    layers.Dense(1)
 ])
 model.summary()
 
@@ -118,6 +111,6 @@ plt.show()
 
 
 # ==================== CELL 14: Predict price for a single new house ====================
-sample = X_test[0].reshape(1, -1)            # already scaled
+sample = X_test[0].reshape(1, -1)
 print("Predicted :", model.predict(sample)[0][0])
 print("Actual    :", y_test[0])

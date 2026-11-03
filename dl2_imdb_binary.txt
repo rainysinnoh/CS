@@ -1,9 +1,4 @@
-# ##########################################################
-#  DL ASSIGNMENT 2: Binary Classification using Deep Neural Network
-#  Dataset: IMDB Movie Reviews (positive / negative)
-# ##########################################################
-
-# ==================== CELL 1: Imports ====================
+# ==================== CELL 1: Imports - Assignment: Binary Classification using DNN (IMDB) ====================
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -25,7 +20,6 @@ print("First label (1=positive, 0=negative):", train_labels[0])
 # ==================== CELL 3: Decode a review back to text ====================
 word_index = keras.datasets.imdb.get_word_index()
 reverse_word_index = {v: k for k, v in word_index.items()}
-# indices 0,1,2 are reserved (padding, start, unknown) -> offset by 3
 decoded = ' '.join([reverse_word_index.get(i - 3, '?') for i in train_data[0]])
 print(decoded)
 
@@ -57,7 +51,7 @@ model = keras.Sequential([
     layers.Input(shape=(10000,)),
     layers.Dense(16, activation='relu'),
     layers.Dense(16, activation='relu'),
-    layers.Dense(1, activation='sigmoid')      # sigmoid -> probability of positive
+    layers.Dense(1, activation='sigmoid')
 ])
 model.summary()
 

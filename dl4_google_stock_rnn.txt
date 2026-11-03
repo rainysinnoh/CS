@@ -1,11 +1,4 @@
-# ##########################################################
-#  DL ASSIGNMENT 4: Time Series Analysis & Prediction using RNN (LSTM)
-#  Dataset: Google Stock Price (GOOGL.csv  - needs Date, Close columns)
-#  Get it from: Kaggle "Google Stock Price" OR download GOOGL history
-#  from Yahoo Finance, save as GOOGL.csv in the same folder as the notebook.
-# ##########################################################
-
-# ==================== CELL 1: Imports ====================
+# ==================== CELL 1: Imports - Assignment: Time Series Prediction using RNN (Google Stock) ====================
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -21,7 +14,7 @@ np.random.seed(42)
 tf.random.set_seed(42)
 
 
-# ==================== CELL 2: Load data ====================
+# ==================== CELL 2: Load data (put GOOGL.csv with Date and Close columns next to the notebook) ====================
 df = pd.read_csv('GOOGL.csv')
 df['Date'] = pd.to_datetime(df['Date'])
 df = df.sort_values('Date').set_index('Date')
@@ -45,7 +38,7 @@ plt.show()
 # ==================== CELL 5: Keep only the Close column ====================
 data = df[['Close']]
 dataset = data.values
-training_data_len = int(np.ceil(0.8 * len(dataset)))      # 80% train / 20% test
+training_data_len = int(np.ceil(0.8 * len(dataset)))
 print("Total rows:", len(dataset), " Train rows:", training_data_len)
 
 
@@ -65,7 +58,7 @@ for i in range(time_steps, len(train_data)):
     y_train.append(train_data[i, 0])
 
 x_train, y_train = np.array(x_train), np.array(y_train)
-x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], 1)     # (samples, timesteps, features)
+x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], 1)
 print("x_train:", x_train.shape, " y_train:", y_train.shape)
 
 
@@ -100,7 +93,7 @@ plt.show()
 
 # ==================== CELL 12: Create test sequences ====================
 test_data = scaled_data[training_data_len - time_steps:]
-y_test = dataset[training_data_len:]                    # actual (unscaled) prices
+y_test = dataset[training_data_len:]
 
 x_test = []
 for i in range(time_steps, len(test_data)):

@@ -1,15 +1,4 @@
-# ##########################################################
-#  DL ASSIGNMENT 4: Anomaly Detection using Autoencoder
-#  Dataset: ECG (5000 heartbeats, 140 points each). Label 1 = NORMAL, 0 = ANOMALY
-#  Steps: a. Import libraries      b. Upload / access the dataset
-#         c. Encoder -> latent representation
-#         d. Decoder -> reconstruct the input
-#         e. Compile with optimizer, loss and metrics
-#  Idea: train the autoencoder ONLY on normal beats. Anomalies will
-#  reconstruct badly (high error) -> flagged by a threshold.
-# ##########################################################
-
-# ==================== CELL 1: a. Imports ====================
+# ==================== CELL 1: Assignment 4: Anomaly Detection using Autoencoder (ECG) - a. Imports ====================
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -24,9 +13,8 @@ np.random.seed(42)
 tf.random.set_seed(42)
 
 
-# ==================== CELL 2: b. Load the dataset ====================
+# ==================== CELL 2: b. Load the dataset (label 1 = normal, 0 = anomaly) ====================
 path = 'https://storage.googleapis.com/download.tensorflow.org/data/ecg.csv'
-# If you have it offline:  path = 'ecg.csv'
 data = pd.read_csv(path, header=None)
 data.head()
 
@@ -34,7 +22,7 @@ data.head()
 # ==================== CELL 3: Inspect ====================
 print("Shape:", data.shape)
 data.info()
-print(data[140].value_counts())      # 1 = normal, 0 = anomaly
+print(data[140].value_counts())
 
 
 # ==================== CELL 4: Plot one normal and one anomalous ECG ====================
@@ -46,7 +34,7 @@ plt.plot(data[data[140] == 0].iloc[0, :140]); plt.title('Anomalous ECG')
 plt.show()
 
 
-# ==================== CELL 5: Split features / target, then train / test ====================
+# ==================== CELL 5: Split features / target, then train / test (train autoencoder on normal beats only) ====================
 features = data.drop(140, axis=1)
 target = data[140]
 
@@ -54,7 +42,6 @@ x_train, x_test, y_train, y_test = train_test_split(
     features, target, test_size=0.2, random_state=42, stratify=target
 )
 
-# Keep only NORMAL (label 1) beats for training the autoencoder
 train_index = y_train[y_train == 1].index
 train_data = x_train.loc[train_index]
 print("Normal beats used for training:", train_data.shape)
@@ -70,7 +57,6 @@ x_test_scaled = min_max_scaler.transform(x_test.copy())
 class AutoEncoder(Model):
     def __init__(self, output_units, ldim=8):
         super().__init__()
-        # c. Encoder: input -> latent representation (ldim = 8 values)
         self.encoder = Sequential([
             Dense(64, activation='relu'),
             Dropout(0.1),
@@ -80,7 +66,6 @@ class AutoEncoder(Model):
             Dropout(0.1),
             Dense(ldim, activation='relu')
         ])
-        # d. Decoder: latent representation -> reconstructed input
         self.decoder = Sequential([
             Dense(16, activation='relu'),
             Dropout(0.1),
@@ -134,7 +119,6 @@ print(f"Threshold: {threshold}")
 def get_predictions(model, x_scaled, threshold):
     predictions = model.predict(x_scaled)
     errors = tf.keras.losses.msle(predictions, x_scaled).numpy()
-    # error above threshold -> anomaly (0), else normal (1)
     return np.where(errors > threshold, 0.0, 1.0), errors
 
 preds, errors = get_predictions(model, x_test_scaled, threshold)

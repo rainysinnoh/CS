@@ -1,9 +1,4 @@
-# ##########################################################
-#  DL ASSIGNMENT 3: Classify Fashion Clothing using CNN
-#  Dataset: Fashion-MNIST (10 clothing classes)
-# ##########################################################
-
-# ==================== CELL 1: Imports ====================
+# ==================== CELL 1: Imports - Assignment: Classify Fashion Clothing using CNN (Fashion-MNIST) ====================
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns

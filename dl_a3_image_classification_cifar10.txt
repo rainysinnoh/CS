@@ -1,14 +1,4 @@
-# ##########################################################
-#  DL ASSIGNMENT 3: Build the Image Classification Model
-#  (Dataset: CIFAR-10, 10 classes of 32x32 colour images)
-#  Stages: 1. Loading & preprocessing the image data
-#          2. Defining the model's architecture
-#          3. Training the model
-#          4. Estimating the model's performance
-#  (For the MNIST version, use the same cells as Assignment 2.)
-# ##########################################################
-
-# ==================== CELL 1: Imports ====================
+# ==================== CELL 1: Assignment 3: Image Classification Model (CIFAR-10) - Imports ====================
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf

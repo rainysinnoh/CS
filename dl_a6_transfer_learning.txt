@@ -1,16 +1,4 @@
-# ##########################################################
-#  DL ASSIGNMENT 6: Object Detection / Classification using
-#  Transfer Learning of CNN architectures (VGG16)
-#  Dataset: CIFAR-10   (Caltech-101 works the same way - see note at the end)
-#  Steps: a. Load in a pre-trained CNN (VGG16, ImageNet weights)
-#         b. Freeze the lower convolutional layers
-#         c. Add a custom classifier with trainable layers
-#         d. Train the classifier layers on the new dataset
-#         e. Fine-tune: unfreeze some of the top layers and train again
-#  NOTE: needs internet once to download the ImageNet weights (~58 MB).
-# ##########################################################
-
-# ==================== CELL 1: Imports ====================
+# ==================== CELL 1: Assignment 6: Transfer Learning with VGG16 (CIFAR-10) - Imports ====================
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -29,27 +17,24 @@ tf.random.set_seed(42)
 class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer',
                'dog', 'frog', 'horse', 'ship', 'truck']
 
-# Use a subset so that it trains quickly (remove these 4 lines to use the full data)
 x_train, y_train = x_train[:10000], y_train[:10000]
 x_test, y_test = x_test[:2000], y_test[:2000]
+raw_test = x_test[:10].copy()
 
 print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
 
 
 # ==================== CELL 3: Preprocess for VGG16 + one-hot labels ====================
-x_train = preprocess_input(x_train.astype('float32'))     # VGG16 specific scaling
+x_train = preprocess_input(x_train.astype('float32'))
 x_test = preprocess_input(x_test.astype('float32'))
 
 y_train_cat = keras.utils.to_categorical(y_train, 10)
 y_test_cat = keras.utils.to_categorical(y_test, 10)
 
 
-# ==================== CELL 4: a. Load pre-trained VGG16 (without its top classifier) ====================
+# ==================== CELL 4: a. Load pre-trained VGG16 (needs internet once for ImageNet weights) ====================
 vgg_model = VGG16(weights='imagenet', include_top=False, input_shape=(32, 32, 3))
 vgg_model.summary()
-
-# Offline? Download 'vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5' and use:
-# vgg_model = VGG16(weights='path/to/that_file.h5', include_top=False, input_shape=(32, 32, 3))
 
 
 # ==================== CELL 5: b. Freeze all convolutional layers ====================
@@ -60,7 +45,6 @@ for layer in vgg_model.layers:
 
 
 # ==================== CELL 6: c. Add custom classifier ====================
-# VGG16 output for a 32x32 input is (1, 1, 512)
 model = keras.Sequential([
     vgg_model,
     layers.Flatten(),
@@ -94,7 +78,6 @@ for layer in vgg_model.layers[:-4]:
 for layer in vgg_model.layers:
     print(f"{layer.name:20s} trainable = {layer.trainable}")
 
-# Re-compile after changing trainable flags, with a LOW learning rate
 model.compile(optimizer=keras.optimizers.Adam(learning_rate=1e-5),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
@@ -122,9 +105,6 @@ print("Test Accuracy:", acc)
 
 # ==================== CELL 12: Predict a few images ====================
 pred = model.predict(x_test[:10])
-# undo VGG16 preprocessing only for display
-raw_test = keras.datasets.cifar10.load_data()[1][0][:10]
-
 plt.figure(figsize=(14, 3))
 for i in range(10):
     plt.subplot(1, 10, i + 1)
@@ -133,18 +113,3 @@ for i in range(10):
     plt.title(class_names[np.argmax(pred[i])], color='green' if ok else 'red', fontsize=8)
     plt.axis('off')
 plt.show()
-
-
-# ##########################################################
-#  NOTE FOR Caltech-101 (if your lab requires it)
-#  1. Download and extract 101_ObjectCategories (Caltech-101).
-#  2. Load with:
-#       train_ds = keras.utils.image_dataset_from_directory(
-#           '101_ObjectCategories', validation_split=0.2, subset='training',
-#           seed=42, image_size=(224, 224), batch_size=32)
-#       val_ds = keras.utils.image_dataset_from_directory(
-#           '101_ObjectCategories', validation_split=0.2, subset='validation',
-#           seed=42, image_size=(224, 224), batch_size=32)
-#  3. Use VGG16(..., input_shape=(224, 224, 3)), apply preprocess_input via .map(),
-#     and change the last Dense layer to 101 units with loss='sparse_categorical_crossentropy'.
-# ##########################################################
