@@ -1,0 +1,129 @@
+# ##########################################################
+#  DL ASSIGNMENT 3: Build the Image Classification Model
+#  (Dataset: CIFAR-10, 10 classes of 32x32 colour images)
+#  Stages: 1. Loading & preprocessing the image data
+#          2. Defining the model's architecture
+#          3. Training the model
+#          4. Estimating the model's performance
+#  (For the MNIST version, use the same cells as Assignment 2.)
+# ##########################################################
+
+# ==================== CELL 1: Imports ====================
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow import keras
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
+
+
+# ==================== CELL 2: STAGE 1 - Load the data ====================
+(x_train, y_train), (x_test, y_test) = keras.datasets.cifar10.load_data()
+
+for name, arr in [('x_train', x_train), ('y_train', y_train),
+                  ('x_test', x_test), ('y_test', y_test)]:
+    print(name, arr.shape)
+
+class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer',
+               'dog', 'frog', 'horse', 'ship', 'truck']
+
+
+# ==================== CELL 3: Look at some images ====================
+plt.figure(figsize=(10, 4))
+for i in range(10):
+    plt.subplot(2, 5, i + 1)
+    plt.imshow(x_train[i])
+    plt.title(class_names[y_train[i][0]])
+    plt.axis('off')
+plt.tight_layout()
+plt.show()
+
+
+# ==================== CELL 4: Preprocess - scale pixels and one-hot encode labels ====================
+x_train = x_train.astype('float32') / 255.0
+x_test = x_test.astype('float32') / 255.0
+
+y_train_cat = keras.utils.to_categorical(y_train, 10)
+y_test_cat = keras.utils.to_categorical(y_test, 10)
+
+print(x_train.shape, y_train_cat.shape)
+
+
+# ==================== CELL 5: STAGE 2 - Define the model architecture (CNN) ====================
+model = keras.Sequential([
+    keras.layers.Input(shape=(32, 32, 3)),
+
+    keras.layers.Conv2D(32, (3, 3), activation='relu'),
+    keras.layers.MaxPooling2D((2, 2)),
+
+    keras.layers.Conv2D(64, (3, 3), activation='relu'),
+    keras.layers.MaxPooling2D((2, 2)),
+
+    keras.layers.Conv2D(64, (3, 3), activation='relu'),
+
+    keras.layers.Flatten(),
+    keras.layers.Dense(64, activation='relu'),
+    keras.layers.Dense(10, activation='softmax')
+])
+model.summary()
+
+
+# ==================== CELL 6: Compile ====================
+model.compile(optimizer='adam',
+              loss='categorical_crossentropy',
+              metrics=['accuracy'])
+
+
+# ==================== CELL 7: STAGE 3 - Train the model ====================
+history = model.fit(x_train, y_train_cat,
+                    batch_size=64,
+                    epochs=10,
+                    validation_data=(x_test, y_test_cat),
+                    shuffle=True)
+
+
+# ==================== CELL 8: Plot accuracy and loss ====================
+plt.figure(figsize=(14, 5))
+
+plt.subplot(1, 2, 1)
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('Model Accuracy')
+plt.ylabel('Accuracy'); plt.xlabel('Epoch')
+plt.legend(['train', 'test'], loc='lower right')
+
+plt.subplot(1, 2, 2)
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model Loss')
+plt.ylabel('Loss'); plt.xlabel('Epoch')
+plt.legend(['train', 'test'], loc='upper right')
+plt.show()
+
+
+# ==================== CELL 9: STAGE 4 - Estimate performance ====================
+test_loss, test_acc = model.evaluate(x_test, y_test_cat)
+print("Test Loss    :", test_loss)
+print("Test Accuracy:", test_acc)
+
+
+# ==================== CELL 10: Classification report + confusion matrix ====================
+predictions = model.predict(x_test)
+y_pred = np.argmax(predictions, axis=1)
+
+print(classification_report(y_test.flatten(), y_pred, target_names=class_names))
+
+plt.figure(figsize=(9, 7))
+sns.heatmap(confusion_matrix(y_test.flatten(), y_pred), annot=True, fmt='d', cmap='Blues',
+            xticklabels=class_names, yticklabels=class_names)
+plt.xlabel('Predicted'); plt.ylabel('Actual'); plt.title('Confusion Matrix')
+plt.show()
+
+
+# ==================== CELL 11: Predict individual images ====================
+for idx in [0, 100]:
+    plt.figure(figsize=(3, 3))
+    plt.imshow(x_test[idx])
+    plt.title(f"Predicted: {class_names[y_pred[idx]]}\nActual: {class_names[y_test[idx][0]]}")
+    plt.axis('off')
+    plt.show()

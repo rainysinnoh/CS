@@ -1,0 +1,123 @@
+# ##########################################################
+#  DL ASSIGNMENT 1: Study of Deep Learning Packages
+#  TensorFlow, Keras, Theano, PyTorch
+#  (Paste CELL 1 and CELL 2 in Jupyter; CELL 3 is the written study
+#   - copy it into your journal / write-up.)
+# ##########################################################
+
+# ==================== CELL 1: Check which packages are installed (and their versions) ====================
+import importlib
+
+for pkg in ['tensorflow', 'keras', 'theano', 'torch']:
+    try:
+        m = importlib.import_module(pkg)
+        print(f"{pkg:12s} installed  -> version {getattr(m, '__version__', 'unknown')}")
+    except Exception as e:
+        print(f"{pkg:12s} NOT installed ({type(e).__name__})")
+
+# Install missing ones (run in a separate cell if needed):
+# !pip install tensorflow keras torch
+# (Theano is discontinued; the maintained fork is:  !pip install pytensor)
+
+
+# ==================== CELL 2: Same tiny computation in each framework ====================
+# y = (a * b) + c   with a=2, b=3, c=4  -> expected 10
+
+# ---- TensorFlow ----
+try:
+    import tensorflow as tf
+    a, b, c = tf.constant(2.0), tf.constant(3.0), tf.constant(4.0)
+    print("TensorFlow:", (a * b + c).numpy())
+except Exception as e:
+    print("TensorFlow error:", e)
+
+# ---- Keras (tiny model: one Dense layer) ----
+try:
+    from tensorflow import keras
+    import numpy as np
+    m = keras.Sequential([keras.layers.Input(shape=(1,)), keras.layers.Dense(1)])
+    m.compile(optimizer='sgd', loss='mse')
+    print("Keras: model built, params =", m.count_params())
+except Exception as e:
+    print("Keras error:", e)
+
+# ---- PyTorch ----
+try:
+    import torch
+    a, b, c = torch.tensor(2.0), torch.tensor(3.0), torch.tensor(4.0)
+    print("PyTorch:", (a * b + c).item())
+except Exception as e:
+    print("PyTorch error:", e)
+
+# ---- Theano (symbolic) ----
+try:
+    import theano
+    import theano.tensor as T
+    x, y, z = T.dscalars('x', 'y', 'z')
+    f = theano.function([x, y, z], x * y + z)
+    print("Theano:", f(2, 3, 4))
+except Exception as e:
+    print("Theano not available:", type(e).__name__)
+
+
+# ==================== CELL 3: Comparison table ====================
+import pandas as pd
+
+table = pd.DataFrame({
+    'Feature': ['Developed by', 'Type', 'Graph style', 'Level of API', 'Hardware', 'Best for', 'Status'],
+    'TensorFlow': ['Google', 'Deep learning framework', 'Static (+ eager mode in TF2)',
+                   'High (Keras) and low level', 'CPU, GPU, TPU, mobile, embedded',
+                   'Production and deployment', 'Active'],
+    'Keras': ['Francois Chollet / Google', 'High-level neural network API', 'Depends on backend',
+              'High level only', 'Via backend (TF / JAX / PyTorch)',
+              'Quick prototyping, beginners', 'Active'],
+    'Theano': ['MILA (Univ. of Montreal)', 'Numerical computation library', 'Static symbolic graph',
+               'Low level', 'CPU, GPU', 'Early research; was a Keras backend', 'Discontinued (2017)'],
+    'PyTorch': ['Facebook / Meta AI Research', 'Deep learning framework', 'Dynamic (define-by-run)',
+                'Low and mid level', 'CPU, GPU', 'Research, easy debugging', 'Active'],
+})
+table.set_index('Feature').T
+
+
+# ==================== CELL 4: WRITTEN STUDY (copy into journal) ====================
+study = """
+1. TensorFlow
+   Distinct features:
+   - Open-source deep learning framework developed by Google.
+   - Complete ecosystem for machine learning and deep learning.
+   - High-level APIs (Keras) and low-level APIs for maximum flexibility.
+   - Supports distributed computing; runs on CPU, GPU, TPU.
+   Functionality:
+   - Computational-graph based, which makes it efficient for deep learning.
+   - Extensive libraries: pre-built layers, optimizers, losses.
+   - Deployment on servers, mobile (TF Lite), browsers (TF.js) and embedded devices.
+
+2. Keras
+   Distinct features:
+   - Open-source high-level neural network API.
+   - Designed for easy and rapid prototyping; simple and consistent API.
+   - Originally ran on TensorFlow, Theano or CNTK; Keras 3 supports TensorFlow, JAX, PyTorch.
+   Functionality:
+   - Define, train and evaluate a neural network in a few lines of code.
+   - Excellent for beginners and quick experiments.
+
+3. Theano
+   Distinct features:
+   - Open-source numerical computation library that optimizes mathematical expressions.
+   - One of the earliest deep learning frameworks; very influential.
+   - Optimizes CPU and GPU computation.
+   Functionality:
+   - Symbolic mathematics with automatic differentiation and expression optimization.
+   - Used as a backend for Keras.
+   - Development stopped in 2017; TensorFlow and PyTorch replaced it (fork: PyTensor).
+
+4. PyTorch
+   Distinct features:
+   - Open-source deep learning framework developed by Facebook's AI Research lab (now Meta).
+   - Dynamic computation graph (define-by-run) - flexible, easy to debug.
+   - Very popular in the research community.
+   Functionality:
+   - Tensors with GPU acceleration, autograd for automatic differentiation.
+   - Libraries for NLP (torchtext), computer vision (torchvision), audio (torchaudio).
+"""
+print(study)

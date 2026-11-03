@@ -1,0 +1,105 @@
+# ##########################################################
+#  DL ASSIGNMENT 2: Implementing Feedforward Neural Network
+#  with Keras and TensorFlow  (Dataset: MNIST)
+#  Steps: a. Import libraries   b. Load & preprocess data
+#         c. Define architecture   d. Train with SGD
+#         e. Evaluate   f. Plot loss and accuracy
+# ##########################################################
+
+# ==================== CELL 1: a. Import required libraries ====================
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow import keras
+
+
+# ==================== CELL 2: b. Load MNIST data ====================
+(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+
+print("x_train:", x_train.shape)    # 60,000 images of 28 x 28
+print("y_train:", y_train.shape)
+print("x_test :", x_test.shape)     # 10,000 images
+print("y_test :", y_test.shape)
+
+
+# ==================== CELL 3: Look at one image ====================
+plt.imshow(x_train[25], cmap='gray')
+plt.title(f"Label: {y_train[25]}")
+plt.show()
+
+print("Unique labels:", np.unique(y_train))
+
+
+# ==================== CELL 4: Preprocess - scale pixels 0..255 -> 0..1 ====================
+x_train = x_train / 255.0
+x_test = x_test / 255.0
+print(x_train.shape, x_test.shape)
+
+
+# ==================== CELL 5: c. Define the network architecture ====================
+model = keras.Sequential([
+    keras.layers.Input(shape=(28, 28)),
+    keras.layers.Flatten(),                                   # 28*28 -> 784
+    keras.layers.Dense(50, activation='relu', name='L1'),
+    keras.layers.Dense(50, activation='relu', name='L2'),
+    keras.layers.Dense(10, activation='softmax', name='L3')   # 10 digits
+])
+model.summary()
+
+
+# ==================== CELL 6: Compile - SGD optimizer ====================
+model.compile(optimizer='sgd',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+
+
+# ==================== CELL 7: d. Train the model ====================
+history = model.fit(x_train, y_train,
+                    batch_size=30,
+                    epochs=10,
+                    validation_data=(x_test, y_test),
+                    shuffle=True)
+
+
+# ==================== CELL 8: f. Plot accuracy and loss ====================
+plt.figure(figsize=(14, 5))
+
+plt.subplot(1, 2, 1)
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('Model Accuracy')
+plt.ylabel('Accuracy'); plt.xlabel('Epoch')
+plt.legend(['train', 'test'], loc='lower right')
+
+plt.subplot(1, 2, 2)
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model Loss')
+plt.ylabel('Loss'); plt.xlabel('Epoch')
+plt.legend(['train', 'test'], loc='upper right')
+plt.show()
+
+
+# ==================== CELL 9: e. Evaluate on test data ====================
+loss, accuracy = model.evaluate(x_test, y_test)
+print("Test Loss    :", loss)
+print("Test Accuracy:", accuracy)
+
+
+# ==================== CELL 10: Predict a single image ====================
+predicted_value = model.predict(x_test)
+
+plt.imshow(x_test[15], cmap='gray')
+plt.show()
+print("Predicted digit:", np.argmax(predicted_value[15]))
+print("Actual digit   :", y_test[15])
+
+
+# ==================== CELL 11: Predict several images ====================
+plt.figure(figsize=(12, 3))
+for i in range(8):
+    plt.subplot(1, 8, i + 1)
+    plt.imshow(x_test[i], cmap='gray')
+    plt.title(f"P:{np.argmax(predicted_value[i])}\nA:{y_test[i]}")
+    plt.axis('off')
+plt.show()
